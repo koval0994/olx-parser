@@ -8,8 +8,7 @@ from aiogram.types import (
     KeyboardButton,
     InlineKeyboardMarkup,
     InlineKeyboardButton,
-    SendKeyboardButtonRequestChat,
-    ChatShared
+    KeyboardButtonRequestChat
 )
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
@@ -27,7 +26,6 @@ dp = Dispatcher()
 
 # ----------------- КЛАВИАТУРЫ -----------------
 
-# Главное меню бота со всеми кнопками
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [
@@ -38,9 +36,9 @@ main_keyboard = ReplyKeyboardMarkup(
             KeyboardButton(text="⚙️ Настройки"),
             KeyboardButton(
                 text="👥 Поделиться группой",
-                request_chat=SendKeyboardButtonRequestChat(
+                request_chat=KeyboardButtonRequestChat(
                     request_id=1,
-                    chat_is_channel=False, # True если нужные каналы
+                    chat_is_channel=False,
                     bot_is_member=True
                 )
             )
@@ -49,13 +47,12 @@ main_keyboard = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-# ----------------- ОБРАБОТЧИКИ (HANDLERS) -----------------
+# ----------------- ОБРАБОТЧИКИ -----------------
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
     await message.answer(
-        "👋 **Привет! Я OLX Parser Бот.**\n\n"
-        "Выберите действие в меню ниже:",
+        "👋 **Привет! Я OLX Parser Бот.**\n\nВыберите действие в меню ниже:",
         reply_markup=main_keyboard,
         parse_mode="Markdown"
     )
@@ -78,7 +75,6 @@ async def process_settings(message: types.Message):
     )
     await message.answer("Настройки бота:", reply_markup=inline_kb)
 
-# Обработка отправки группы через кнопку request_chat
 @dp.message(F.chat_shared)
 async def process_chat_shared(message: types.Message):
     shared_chat_id = message.chat_shared.chat_id
@@ -87,14 +83,14 @@ async def process_chat_shared(message: types.Message):
         parse_mode="Markdown"
     )
 
-# ----------------- ЛОГИКА ВЕБХУКА И ЗАПУСКА -----------------
+# ----------------- ЛОГИКА ВЕБХУКА -----------------
 
 async def on_startup(bot: Bot) -> None:
     logging.info(f"Установка вебхука: {BASE_WEBHOOK_URL}")
     await bot.set_webhook(BASE_WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(bot: Bot) -> None:
-    # ФИКС: НЕ удаляем вебхук при остановке, чтобы Render не ломал подключение
+    # Вебхук НЕ удаляем, чтобы Render при перезапусках не ломал работу
     logging.info("Остановка сервера (вебхук сохраняется).")
     pass
 
