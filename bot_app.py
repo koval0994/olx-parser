@@ -15,8 +15,8 @@ from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_applicati
 # Логирование
 logging.basicConfig(level=logging.INFO)
 
-# Конфигурация
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+# КОНФИГУРАЦИЯ (Исправлено имя переменной)
+BOT_TOKEN = os.getenv("TELEGRAM_TOKEN")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 WEBHOOK_PATH = "/webhook"
 BASE_WEBHOOK_URL = f"{WEBHOOK_URL}{WEBHOOK_PATH}"
@@ -90,7 +90,7 @@ async def on_startup(bot: Bot) -> None:
     await bot.set_webhook(BASE_WEBHOOK_URL, drop_pending_updates=True)
 
 async def on_shutdown(bot: Bot) -> None:
-    # Вебхук НЕ удаляем, чтобы Render при перезапусках не ломал работу
+    # ФИКС: Вебхук НЕ удаляется при выключении контейнера
     logging.info("Остановка сервера (вебхук сохраняется).")
     pass
 
